@@ -28,7 +28,7 @@ public class StudentApp extends JFrame {
     }
 
     private void createWindow() {
-        setTitle("ระบบข้อมูลนักศึกษา");
+        setTitle("ระบบข้อมูลนิสิต");
         setSize(1000, 700);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
@@ -104,14 +104,14 @@ public class StudentApp extends JFrame {
                 BorderFactory.createEmptyBorder(20, 25, 20, 25)
         ));
 
-        JLabel titleLabel = new JLabel("ระบบจัดการข้อมูลนักศึกษา");
+        JLabel titleLabel = new JLabel("ระบบจัดการข้อมูลนิสิต");
         titleLabel.setFont(new Font("Tahoma", Font.BOLD, 24));
         titleLabel.setForeground(new Color(52, 73, 94));
 
         JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         rightPanel.setBackground(Color.WHITE);
 
-        JLabel searchLabel = new JLabel("รหัสนักศึกษา:");
+        JLabel searchLabel = new JLabel("รหัสนิสิต:");
         searchLabel.setFont(new Font("Tahoma", Font.PLAIN, 14));
         searchLabel.setForeground(new Color(100, 100, 100));
 
