@@ -4,15 +4,16 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.*;
+import com.formdev.flatlaf.*;
 
 public class StudentApp extends JFrame {
 
-    private JTable dataTable;
-    private DefaultTableModel tableModel;
-    private JButton refreshButton;
-    private JLabel statusLabel;
+    private JTable table;
+    private DefaultTableModel model;
+    private JButton refreshBtn;
+    private JLabel status;
     private JTextField searchBox;
-    private JButton searchButton;
+    private JButton searchBtn;
 
     private String server = "202.28.34.202";
     private String database = "PRYMANIA_DB";
@@ -20,142 +21,97 @@ public class StudentApp extends JFrame {
     private String password = "db_67011212055";
 
     public StudentApp() {
+        setupTheme();
         createWindow();
         createComponents();
         setupLayout();
-        addButtonActions();
-        loadAllData();
+        addActions();
+        loadData();
+    }
+
+    private void setupTheme() {
+        try {
+
+            UIManager.setLookAndFeel(new FlatIntelliJLaf());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void createWindow() {
-        setTitle("ระบบข้อมูลนิสิต");
+        setTitle("Student System");
         setSize(1000, 700);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
-        getContentPane().setBackground(new Color(248, 249, 250));
     }
 
     private void createComponents() {
-        tableModel = new DefaultTableModel();
-        dataTable = new JTable(tableModel);
-        refreshButton = new JButton("รีเฟรชข้อมูล");
-        statusLabel = new JLabel("เริ่มต้นระบบ...", JLabel.LEFT);
+        model = new DefaultTableModel();
+        table = new JTable(model);
+        refreshBtn = new JButton("Refresh");
+        status = new JLabel("Starting...", JLabel.LEFT);
         searchBox = new JTextField(15);
-        searchButton = new JButton("ค้นหา");
-        styleAllComponents();
+        searchBtn = new JButton("Search");
+
+        setupStyles();
     }
 
-    private void styleAllComponents() {
-        dataTable.setFont(new Font("Tahoma", Font.PLAIN, 13));
-        dataTable.setRowHeight(35);
-        dataTable.setSelectionBackground(new Color(230, 240, 255));
-        dataTable.setSelectionForeground(Color.BLACK);
-        dataTable.setGridColor(new Color(230, 230, 230));
-        dataTable.setShowVerticalLines(true);
-        dataTable.setShowHorizontalLines(true);
+    private void setupStyles() {
+        table.setFont(new Font("Arial", Font.PLAIN, 13));
+        table.setRowHeight(35);
+        table.getTableHeader().setFont(new Font("Arial", Font.BOLD, 14));
+        table.getTableHeader().setPreferredSize(new Dimension(0, 40));
 
-        dataTable.getTableHeader().setFont(new Font("Tahoma", Font.BOLD, 14));
-        dataTable.getTableHeader().setBackground(new Color(52, 73, 94));
-        dataTable.getTableHeader().setForeground(Color.WHITE);
-        dataTable.getTableHeader().setPreferredSize(new Dimension(0, 40));
+        refreshBtn.setFont(new Font("Arial", Font.BOLD, 14));
+        refreshBtn.setPreferredSize(new Dimension(100, 35));
 
-        refreshButton.setFont(new Font("Tahoma", Font.BOLD, 14));
-        refreshButton.setPreferredSize(new Dimension(130, 35));
-        refreshButton.setBorder(BorderFactory.createEmptyBorder());
-        refreshButton.setFocusPainted(false);
-        refreshButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
-
-        searchBox.setFont(new Font("Tahoma", Font.PLAIN, 14));
+        searchBox.setFont(new Font("Arial", Font.PLAIN, 14));
         searchBox.setPreferredSize(new Dimension(150, 35));
-        searchBox.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
-                BorderFactory.createEmptyBorder(5, 10, 5, 10)
-        ));
 
-        searchButton.setFont(new Font("Tahoma", Font.BOLD, 14));
-        searchButton.setBackground(new Color(52, 152, 219));
-        searchButton.setPreferredSize(new Dimension(80, 35));
-        searchButton.setBorder(BorderFactory.createEmptyBorder());
-        searchButton.setFocusPainted(false);
-        searchButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        searchBtn.setFont(new Font("Arial", Font.BOLD, 14));
+        searchBtn.setPreferredSize(new Dimension(80, 35));
 
-        statusLabel.setFont(new Font("Tahoma", Font.PLAIN, 12));
-        statusLabel.setForeground(new Color(100, 100, 100));
-        statusLabel.setBorder(BorderFactory.createEmptyBorder(8, 15, 8, 15));
+        status.setFont(new Font("Arial", Font.PLAIN, 12));
     }
 
     private void setupLayout() {
         setLayout(new BorderLayout());
 
-        JPanel topPanel = createTopPanel();
-        JScrollPane centerPanel = createCenterPanel();
-        JPanel bottomPanel = createBottomPanel();
+        JPanel topPanel = new JPanel(new BorderLayout());
+        topPanel.setBorder(BorderFactory.createEmptyBorder(20, 25, 20, 25));
+
+        JLabel title = new JLabel("Student Management System");
+        title.setFont(new Font("Arial", Font.BOLD, 24));
+
+        JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
+        rightPanel.add(new JLabel("Search:"));
+        rightPanel.add(searchBox);
+        rightPanel.add(searchBtn);
+        rightPanel.add(refreshBtn);
+
+        topPanel.add(title, BorderLayout.WEST);
+        topPanel.add(rightPanel, BorderLayout.EAST);
+
+        JScrollPane scrollPane = new JScrollPane(table);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder(0, 25, 10, 25));
+
+        JPanel bottomPanel = new JPanel(new BorderLayout());
+        bottomPanel.setBorder(BorderFactory.createEmptyBorder(5, 25, 5, 25));
+        bottomPanel.add(status, BorderLayout.WEST);
 
         add(topPanel, BorderLayout.NORTH);
-        add(centerPanel, BorderLayout.CENTER);
+        add(scrollPane, BorderLayout.CENTER);
         add(bottomPanel, BorderLayout.SOUTH);
     }
 
-    private JPanel createTopPanel() {
-        JPanel mainPanel = new JPanel(new BorderLayout());
-        mainPanel.setBackground(Color.WHITE);
-        mainPanel.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(230, 230, 230)),
-                BorderFactory.createEmptyBorder(20, 25, 20, 25)
-        ));
-
-        JLabel titleLabel = new JLabel("ระบบจัดการข้อมูลนิสิต");
-        titleLabel.setFont(new Font("Tahoma", Font.BOLD, 24));
-        titleLabel.setForeground(new Color(52, 73, 94));
-
-        JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
-        rightPanel.setBackground(Color.WHITE);
-
-        JLabel searchLabel = new JLabel("รหัสนิสิต:");
-        searchLabel.setFont(new Font("Tahoma", Font.PLAIN, 14));
-        searchLabel.setForeground(new Color(100, 100, 100));
-
-        rightPanel.add(searchLabel);
-        rightPanel.add(searchBox);
-        rightPanel.add(searchButton);
-        rightPanel.add(Box.createHorizontalStrut(10));
-        rightPanel.add(refreshButton);
-
-        mainPanel.add(titleLabel, BorderLayout.WEST);
-        mainPanel.add(rightPanel, BorderLayout.EAST);
-
-        return mainPanel;
-    }
-
-    private JScrollPane createCenterPanel() {
-        JScrollPane scrollPane = new JScrollPane(dataTable);
-        scrollPane.setBorder(BorderFactory.createEmptyBorder(20, 25, 10, 25));
-        scrollPane.setBackground(new Color(248, 249, 250));
-        scrollPane.getViewport().setBackground(Color.WHITE);
-        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-        return scrollPane;
-    }
-
-    private JPanel createBottomPanel() {
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.setBackground(new Color(248, 249, 250));
-        panel.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createMatteBorder(1, 0, 0, 0, new Color(230, 230, 230)),
-                BorderFactory.createEmptyBorder(5, 0, 5, 0)
-        ));
-        panel.add(statusLabel, BorderLayout.WEST);
-        return panel;
-    }
-
-    private void addButtonActions() {
-        refreshButton.addActionListener(new ActionListener() {
+    private void addActions() {
+        refreshBtn.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                loadAllData();
+                loadData();
             }
         });
 
-        searchButton.addActionListener(new ActionListener() {
+        searchBtn.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 searchData();
             }
@@ -168,7 +124,7 @@ public class StudentApp extends JFrame {
         });
     }
 
-    private Connection connectDatabase() throws SQLException {
+    private Connection getConnection() throws SQLException {
         String url = "jdbc:sqlserver://" + server + ":1433;" +
                 "databaseName=" + database + ";" +
                 "encrypt=false;trustServerCertificate=true";
@@ -176,112 +132,112 @@ public class StudentApp extends JFrame {
     }
 
     private void clearTable() {
-        tableModel.setColumnCount(0);
-        tableModel.setRowCount(0);
+        model.setColumnCount(0);
+        model.setRowCount(0);
     }
 
-    private void setupTableColumns(ResultSetMetaData metaData) throws SQLException {
-        int columnCount = metaData.getColumnCount();
-        for (int i = 1; i <= columnCount; i++) {
-            tableModel.addColumn(metaData.getColumnName(i));
+    private void setupColumns(ResultSetMetaData meta) throws SQLException {
+        int cols = meta.getColumnCount();
+        for (int i = 1; i <= cols; i++) {
+            model.addColumn(meta.getColumnName(i));
         }
-        tableModel.addColumn("detail");
-        dataTable.getColumn("detail").setCellRenderer(new DetailButton());
-        dataTable.getColumn("detail").setCellEditor(new DetailButtonEditor(new JCheckBox()));
-        dataTable.getColumn("detail").setPreferredWidth(60);
+        model.addColumn("detail");
+        table.getColumn("detail").setCellRenderer(new DetailButton());
+        table.getColumn("detail").setCellEditor(new DetailButtonEditor(new JCheckBox()));
+        table.getColumn("detail").setPreferredWidth(60);
     }
 
-    private int addTableRows(ResultSet resultSet) throws SQLException {
-        ResultSetMetaData metaData = resultSet.getMetaData();
-        int columnCount = metaData.getColumnCount();
-        int rowCount = 0;
+    private int addRows(ResultSet rs) throws SQLException {
+        ResultSetMetaData meta = rs.getMetaData();
+        int cols = meta.getColumnCount();
+        int count = 0;
 
-        while (resultSet.next()) {
-            Object[] rowData = new Object[columnCount + 1];
-            for (int i = 1; i <= columnCount; i++) {
-                Object value = resultSet.getObject(i);
+        while (rs.next()) {
+            Object[] row = new Object[cols + 1];
+            for (int i = 1; i <= cols; i++) {
+                Object value = rs.getObject(i);
                 if (value == null) {
-                    rowData[i - 1] = "null";
+                    row[i - 1] = "null";
                     if (i == 6) {
-                        rowData[i - 1] = "0";
+                        row[i - 1] = "0";
                     }
                 } else {
-                    rowData[i - 1] = value;
+                    row[i - 1] = value;
                 }
             }
-            rowData[columnCount] = "detail";
-            tableModel.addRow(rowData);
-            rowCount++;
+            row[cols] = "detail";
+            model.addRow(row);
+            count++;
         }
-        return rowCount;
+        return count;
     }
 
-    private void showStatus(String message) {
-        statusLabel.setText(message);
+    private void updateStatus(String msg) {
+        status.setText(msg);
     }
 
-    private void showError(String message) {
-        JOptionPane.showMessageDialog(this, message, "ข้อผิดพลาด", JOptionPane.ERROR_MESSAGE);
+    private void showError(String msg) {
+        JOptionPane.showMessageDialog(this, msg, "Error", JOptionPane.ERROR_MESSAGE);
     }
 
     private void searchData() {
-        String searchText = searchBox.getText().trim();
-        showStatus("กำลังค้นหาข้อมูล...");
-        searchButton.setEnabled(false);
+        String text = searchBox.getText().trim();
+        updateStatus("Searching...");
+        searchBtn.setEnabled(false);
 
         try {
-            Connection conn = connectDatabase();
-            PreparedStatement stmt = conn.prepareStatement("SELECT * FROM STUDENT WHERE sid = ? or name LIKE ? or major LIKE ?");
-            stmt.setString(1, searchText);
-            stmt.setString(2, searchText + "%");
-            stmt.setString(3, searchText + "%");
-            ResultSet resultSet = stmt.executeQuery();
+            Connection conn = getConnection();
+            PreparedStatement stmt = conn.prepareStatement("SELECT *,DATEDIFF(YEAR, birthday, GETDATE()) AS age  FROM STUDENT WHERE sid = ? or name LIKE ? or major LIKE ?");
+            stmt.setString(1, text);
+            stmt.setString(2, text + "%");
+            stmt.setString(3, text + "%");
+            ResultSet rs = stmt.executeQuery();
 
             clearTable();
-            setupTableColumns(resultSet.getMetaData());
-            int foundCount = addTableRows(resultSet);
+            setupColumns(rs.getMetaData());
+            int found = addRows(rs);
             conn.close();
 
-            if (foundCount > 0) {
-                showStatus("พบข้อมูล " + foundCount + " รายการ");
+            if (found > 0) {
+                updateStatus("Found " + found + " records");
             } else {
-                showStatus("ไม่พบข้อมูลสำหรับ: " + searchText);
+                updateStatus("No records found for: " + text);
             }
 
         } catch (SQLException e) {
-            showError("ค้นหาไม่สำเร็จ: " + e.getMessage());
-            showStatus("เกิดข้อผิดพลาดในการค้นหา");
+            showError("Search failed: " + e.getMessage());
+            updateStatus("Search error");
         }
-        searchButton.setEnabled(true);
+        searchBtn.setEnabled(true);
     }
 
-    private void loadAllData() {
-        showStatus("กำลังโหลดข้อมูล...");
-        refreshButton.setEnabled(false);
+    private void loadData() {
+        updateStatus("Loading data...");
+        refreshBtn.setEnabled(false);
 
         try {
-            Connection conn = connectDatabase();
-            showStatus("เชื่อมต่อสำเร็จ กำลังดึงข้อมูล...");
+            Connection conn = getConnection();
+            updateStatus("Connected, getting data...");
             Statement stmt = conn.createStatement();
-            ResultSet resultSet = stmt.executeQuery("SELECT *, DATEDIFF(YEAR, birthday, GETDATE()) AS age FROM STUDENT");
+            ResultSet rs = stmt.executeQuery("SELECT *, DATEDIFF(YEAR, birthday, GETDATE()) AS age FROM STUDENT");
 
             clearTable();
-            setupTableColumns(resultSet.getMetaData());
-            int totalCount = addTableRows(resultSet);
+            setupColumns(rs.getMetaData());
+            int total = addRows(rs);
             conn.close();
 
-            showStatus("โหลดข้อมูลสำเร็จ - ทั้งหมด " + totalCount + " รายการ");
+            updateStatus("Loaded " + total + " records");
 
         } catch (SQLException e) {
-            showStatus("เชื่อมต่อไม่สำเร็จ");
-            showError("ไม่สามารถเชื่อมต่อฐานข้อมูลได้\n\n" + e.getMessage());
+            updateStatus("Connection failed");
+            showError("Cannot connect to database\n\n" + e.getMessage());
         }
-        refreshButton.setEnabled(true);
+        refreshBtn.setEnabled(true);
     }
 
-    public void showStudentDetail(String studentId) {
+    public void showDetail(String studentId) {
         try {
-            Connection conn = connectDatabase();
+            Connection conn = getConnection();
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery("SELECT * FROM ENROLL WHERE stdid = '" + studentId + "'");
 
@@ -291,13 +247,13 @@ public class StudentApp extends JFrame {
             conn.close();
 
         } catch (SQLException e) {
-            showStatus("เชื่อมต่อไม่สำเร็จ");
-            showError("ไม่สามารถเชื่อมต่อฐานข้อมูลได้\n\n" + e.getMessage());
+            updateStatus("Connection failed");
+            showError("Cannot connect to database\n\n" + e.getMessage());
         }
     }
 
-    public JTable getDataTable() {
-        return dataTable;
+    public JTable getTable() {
+        return table;
     }
 
     public static void main(String[] args) {

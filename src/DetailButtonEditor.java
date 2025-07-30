@@ -5,25 +5,24 @@ import java.awt.event.ActionListener;
 
 public class DetailButtonEditor extends DefaultCellEditor {
 
-    protected JButton detailButton;
-    private StudentApp mainApp;
+    protected JButton btn;
 
     public DetailButtonEditor(JCheckBox checkBox) {
         super(checkBox);
-        detailButton = new JButton();
-        detailButton.setOpaque(true);
-        detailButton.setText("detail");
+        btn = new JButton();
+        btn.setOpaque(true);
+        btn.setText("detail");
 
-        detailButton.addActionListener(new ActionListener() {
+        btn.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                JTable table = (JTable) SwingUtilities.getAncestorOfClass(JTable.class, detailButton);
+                JTable table = (JTable) SwingUtilities.getAncestorOfClass(JTable.class, btn);
                 if (table != null) {
-                    int selectedRow = table.getSelectedRow();
-                    Object studentId = table.getValueAt(selectedRow, 0);
+                    int row = table.getSelectedRow();
+                    Object id = table.getValueAt(row, 0);
 
                     StudentApp app = (StudentApp) SwingUtilities.getWindowAncestor(table);
                     if (app != null) {
-                        app.showStudentDetail(studentId.toString());
+                        app.showDetail(id.toString());
                     }
                 }
             }
@@ -31,7 +30,7 @@ public class DetailButtonEditor extends DefaultCellEditor {
     }
 
     public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
-        return detailButton;
+        return btn;
     }
 
     public Object getCellEditorValue() {
