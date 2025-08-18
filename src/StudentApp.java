@@ -15,10 +15,10 @@ public class StudentApp extends JFrame {
     private JTextField searchBox;
     private JButton searchBtn;
 
-    private String server = "202.28.34.202";
+    private String server = "";
     private String database = "PRYMANIA_DB";
-    private String username = "db_67011212055";
-    private String password = "db_67011212055";
+    private String username = "";
+    private String password = "";
 
     public StudentApp() {
         setupTheme();
